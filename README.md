@@ -34,9 +34,6 @@
 - **Handwriting Recognition Accuracy** – Optimized Tesseract.js with image preprocessing.  
 - **UI/UX Improvements** – Implemented Framer Motion animations and Tailwind styling.  
 
-## 📸 Screenshots  
-(Upload screenshots of your project UI here)  
-
 ## 🔗 Live Demo & Resources  
 - 🌐 **Live Project:** [https://ai-teacherx.netlify.app/]  
 
