@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { createWorker } from 'tesseract.js';
 
+interface LoggerMessage {
+  status: string;
+}
+
+// Extended worker type with required methods
+interface TesseractWorker {
+  load: () => Promise<void>;
+  loadLanguage: (lang: string) => Promise<void>;
+  initialize: (lang: string) => Promise<void>;
+  recognize: (file: File) => Promise<{ data: { text: string; confidence: number } }>;
+  terminate: () => Promise<void>;
+  logger: (m: LoggerMessage) => void;
+}
+
 interface OCRResult {
   text: string;
   confidence: number;
@@ -17,27 +31,26 @@ export const useOCRProcessor = () => {
       setError(null);
       setProgress(0);
 
-      // Create a worker
-      const worker = createWorker({
-        logger: m => {
-          console.log(m);
-          if (m.status === 'loading tesseract core') setProgress(25);
-          if (m.status === 'loading language traineddata') setProgress(50);
-          if (m.status === 'initializing api') setProgress(75);
-          if (m.status === 'recognizing text') setProgress(90);
-        }
-      });
+      // Create a worker with custom type
+      const worker = (await createWorker()) as unknown as TesseractWorker;
+      worker.logger = (m: LoggerMessage) => {
+        console.log(m);
+        if (m.status === 'loading tesseract core') setProgress(25);
+        if (m.status === 'loading language traineddata') setProgress(50);
+        if (m.status === 'initializing api') setProgress(75);
+        if (m.status === 'recognizing text') setProgress(90);
+      };
 
       // Initialize worker
-      await (await worker).load();
-      await (await worker).loadLanguage('eng');
-      await (await worker).initialize('eng');
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
 
       // Process the image
-      const { data } = await (await worker).recognize(imageFile);
+      const { data } = await worker.recognize(imageFile);
       
       // Cleanup
-      await (await worker).terminate();
+      await worker.terminate();
       
       setProgress(100);
 
