@@ -21,7 +21,9 @@ import {
   Download,
   Upload,
   VolumeX,
-  Lightbulb
+  Lightbulb,
+  Menu,
+  X
 } from 'lucide-react';
 import { useVoiceRecognition } from './hooks/useVoiceRecognition';
 import { useAIResponse } from './hooks/useAIResponse';
@@ -126,6 +128,8 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showAnalyzeButton, setShowAnalyzeButton] = useState(false);
   const [isLocalLoading, setIsLocalLoading] = useState(false);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Reset response when switching modes
   useEffect(() => {
@@ -327,44 +331,84 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Brain className="w-16 h-16 text-indigo-600" />
-            <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <header className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <Brain className="w-10 h-10 sm:w-16 sm:h-16 text-indigo-600" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
               {translations.title}
             </h1>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">
             {translations.description}
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-6 sm:mt-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition">
-                <feature.icon className="w-8 h-8 text-indigo-600 mb-2 mx-auto" />
-                <p className="text-sm text-gray-700 text-center">{feature.text}</p>
+              <div key={index} className="bg-white rounded-xl p-3 sm:p-4 shadow-md hover:shadow-lg transition">
+                <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 mb-1 sm:mb-2 mx-auto" />
+                <p className="text-xs sm:text-sm text-gray-700 text-center">{feature.text}</p>
               </div>
             ))}
           </div>
         </header>
 
-        {/* Mode Selector */}
-        <div className="flex justify-center gap-4 mb-8">
+        {/* Mode Selector - Desktop */}
+        <div className="hidden sm:flex justify-center gap-2 md:gap-4 mb-6 sm:mb-8">
           {modes.map((m) => (
             <button
               key={m.id}
               onClick={() => setMode(m.id as Mode)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition ${
                 mode === m.id
                   ? 'bg-indigo-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+              } text-xs sm:text-sm md:text-base`}
             >
-              <m.icon className="w-5 h-5" />
+              <m.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               {m.label}
             </button>
           ))}
+        </div>
+
+        {/* Mode Selector - Mobile */}
+        <div className="sm:hidden mb-6">
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="w-full flex items-center justify-between gap-2 px-4 py-2 bg-white rounded-lg shadow text-gray-700"
+          >
+            <div className="flex items-center gap-2">
+              {modes.find(m => m.id === mode)?.icon && (
+                <div className="text-indigo-600">
+                  {React.createElement(modes.find(m => m.id === mode)?.icon || MessageSquare, { size: 20 })}
+                </div>
+              )}
+              <span>{modes.find(m => m.id === mode)?.label}</span>
+            </div>
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          
+          {mobileMenuOpen && (
+            <div className="mt-2 bg-white rounded-lg shadow-lg overflow-hidden">
+              {modes.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => {
+                    setMode(m.id as Mode);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-4 py-3 transition ${
+                    mode === m.id
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  } border-b border-gray-100 last:border-none`}
+                >
+                  <m.icon className="w-5 h-5" />
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <motion.div
@@ -372,27 +416,28 @@ function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
+          className="w-full"
         >
           {mode === 'chat' && (
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{translations.camera.title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+                  <h2 className="text-lg sm:text-xl font-semibold">{translations.camera.title}</h2>
                   <button
                     onClick={() => setIsImageAnalysisEnabled(!isImageAnalysisEnabled)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition text-sm sm:text-base ${
                       isImageAnalysisEnabled ? 'bg-red-600' : 'bg-indigo-600'
                     } text-white hover:opacity-90`}
                   >
                     {isImageAnalysisEnabled ? (
                       <>
-                        <EyeOff className="w-5 h-5" />
-                        {translations.camera.disable}
+                        <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="hidden xs:inline">{translations.camera.disable}</span>
                       </>
                     ) : (
                       <>
-                        <Eye className="w-5 h-5" />
-                        {translations.camera.enable}
+                        <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="hidden xs:inline">{translations.camera.enable}</span>
                       </>
                     )}
                   </button>
@@ -404,22 +449,27 @@ function App() {
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
                         className="w-full rounded-lg"
+                        videoConstraints={{
+                          facingMode: "user",
+                          width: { min: 320, ideal: 640, max: 1280 },
+                          height: { min: 240, ideal: 480, max: 720 }
+                        }}
                       />
                     </div>
                     <div className="flex justify-center gap-4">
                       <button
                         onClick={handleAnalyzeImage}
                         disabled={isLoading || isLocalLoading}
-                        className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 shadow-md hover:shadow-lg"
+                        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 shadow-md hover:shadow-lg text-sm sm:text-base"
                       >
                         {isLoading || isLocalLoading ? (
                           <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                             {translations.camera.analyzing}
                           </>
                         ) : (
                           <>
-                            <Camera className="w-5 h-5" />
+                            <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                             {translations.camera.analyze}
                           </>
                         )}
@@ -427,81 +477,81 @@ function App() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                  <div className="flex items-center justify-center h-32 sm:h-48 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                     <div className="text-center">
-                      <Camera className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">{translations.camera.placeholder}</p>
+                      <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm sm:text-base text-gray-500">{translations.camera.placeholder}</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">{translations.voice.title}</h2>
-                    <div className="flex gap-2">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                <div className="mb-4 sm:mb-6">
+                  <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+                    <h2 className="text-lg sm:text-xl font-semibold">{translations.voice.title}</h2>
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={isListening ? stopListening : startListening}
                         disabled={isLoading || isLocalLoading}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                        className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition text-sm sm:text-base ${
                           isListening ? 'bg-red-600' : 'bg-indigo-600'
                         } text-white disabled:opacity-50 hover:opacity-90 shadow-md`}
                       >
-                        <Mic className="w-5 h-5" />
+                        <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
                         {isListening ? translations.voice.stop : translations.voice.start}
                       </button>
                       <button
                         onClick={handleAskQuestion}
                         disabled={!transcript || isLoading || isLocalLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 shadow-md"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 shadow-md text-sm sm:text-base"
                       >
-                        <Volume2 className="w-5 h-5" />
+                        <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
                         {translations.voice.ask}
                       </button>
                     </div>
                   </div>
-                  <div className="min-h-[100px] bg-gray-50 rounded-lg p-4 mb-4 shadow-inner">
-                    <p className="text-gray-700">{transcript || translations.voice.placeholder}</p>
+                  <div className="min-h-[80px] sm:min-h-[100px] bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 shadow-inner">
+                    <p className="text-sm sm:text-base text-gray-700">{transcript || translations.voice.placeholder}</p>
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">{translations.response.title}</h2>
+                  <div className="flex justify-between items-center mb-3 sm:mb-4">
+                    <h2 className="text-lg sm:text-xl font-semibold">{translations.response.title}</h2>
                     <button
                       onClick={clearHistory}
-                      className="flex items-center gap-2 px-3 py-1 text-gray-600 hover:text-red-600 transition"
+                      className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-gray-600 hover:text-red-600 transition text-xs sm:text-sm"
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
                       {translations.response.clear}
                     </button>
                   </div>
-                  <div className="min-h-[150px] bg-gray-50 rounded-lg p-4 shadow-inner">
+                  <div className="min-h-[120px] sm:min-h-[150px] bg-gray-50 rounded-lg p-3 sm:p-4 shadow-inner">
                     {isLoading || isLocalLoading ? (
                       <div className="flex items-center justify-center h-full">
-                        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                        <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 animate-spin" />
                       </div>
                     ) : (
-                      <p className="text-gray-700">{response || translations.response.placeholder}</p>
+                      <p className="text-sm sm:text-base text-gray-700">{response || translations.response.placeholder}</p>
                     )}
                   </div>
                 </div>
 
                 {conversationHistory.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-3">{translations.response.history}</h3>
-                    <div className="max-h-60 overflow-y-auto">
+                  <div className="mt-4 sm:mt-6">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">{translations.response.history}</h3>
+                    <div className="max-h-40 sm:max-h-60 overflow-y-auto">
                       {conversationHistory.map((item, index) => (
                         <div
                           key={index}
-                          className={`mb-2 p-3 rounded-lg ${
+                          className={`mb-2 p-2 sm:p-3 rounded-lg text-sm ${
                             item.type === 'question' 
                               ? 'bg-indigo-50 text-indigo-700' 
                               : 'bg-green-50 text-green-700'
                           }`}
                         >
-                          <p className="text-sm">{item.text}</p>
+                          <p className="text-xs sm:text-sm">{item.text}</p>
                           <p className="text-xs opacity-70 mt-1">
                             {item.timestamp.toLocaleTimeString()}
                           </p>
@@ -515,14 +565,14 @@ function App() {
           )}
 
           {mode === 'quiz' && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+              <div className="mb-4 sm:mb-6">
                 <input
                   type="text"
                   value={quizTopic}
                   onChange={(e) => setQuizTopic(e.target.value)}
                   placeholder={translations.quiz.topic}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
                 />
               </div>
               <QuizSection topic={quizTopic} onComplete={handleQuizComplete} />
@@ -534,10 +584,10 @@ function App() {
           )}
 
           {mode === 'ocr' && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold mb-4">{translations.modes.ocr}</h2>
-                <p className="text-gray-600 mb-4">{translations.ocr.placeholder}</p>
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+              <div className="text-center mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">{translations.modes.ocr}</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-4">{translations.ocr.placeholder}</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -547,9 +597,9 @@ function App() {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer"
+                  className="inline-flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-sm sm:text-base"
                 >
-                  <Upload className="w-5 h-5" />
+                  <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                   {translations.ocr.upload}
                 </label>
               </div>
@@ -560,7 +610,7 @@ function App() {
                   <img 
                     src={uploadedImage} 
                     alt="Uploaded notes" 
-                    className="max-h-64 max-w-full mx-auto rounded-lg shadow-md" 
+                    className="max-h-48 sm:max-h-64 max-w-full mx-auto rounded-lg shadow-md" 
                   />
                 </div>
               )}
@@ -570,50 +620,50 @@ function App() {
                 <div className="mt-4 text-center">
                   <button
                     onClick={handleAnalyzeNotes}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    className="inline-flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm sm:text-base"
                   >
-                    <Lightbulb className="w-5 h-5" />
+                    <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
                     Analyze Notes
                   </button>
                 </div>
               )}
 
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{translations.response.title}</h2>
+              <div className="mt-4 sm:mt-6">
+                <div className="flex justify-between items-center mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold">{translations.response.title}</h2>
                   <button
                     onClick={clearHistory}
-                    className="flex items-center gap-2 px-3 py-1 text-gray-600 hover:text-red-600 transition"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-gray-600 hover:text-red-600 transition text-xs sm:text-sm"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
                     {translations.response.clear}
                   </button>
                 </div>
-                <div className="min-h-[150px] bg-gray-50 rounded-lg p-4 shadow-inner">
+                <div className="min-h-[120px] sm:min-h-[150px] bg-gray-50 rounded-lg p-3 sm:p-4 shadow-inner">
                   {isLoading || isLocalLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                      <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 animate-spin" />
                     </div>
                   ) : (
-                    <p className="text-gray-700">{response || translations.response.placeholder}</p>
+                    <p className="text-sm sm:text-base text-gray-700">{response || translations.response.placeholder}</p>
                   )}
                 </div>
               </div>
 
               {conversationHistory.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-3">{translations.response.history}</h3>
-                  <div className="max-h-60 overflow-y-auto">
+                <div className="mt-4 sm:mt-6">
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">{translations.response.history}</h3>
+                  <div className="max-h-40 sm:max-h-60 overflow-y-auto">
                     {conversationHistory.map((item, index) => (
                       <div
                         key={index}
-                        className={`mb-2 p-3 rounded-lg ${
+                        className={`mb-2 p-2 sm:p-3 rounded-lg ${
                           item.type === 'question' 
                             ? 'bg-indigo-50 text-indigo-700' 
                             : 'bg-green-50 text-green-700'
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{item.text}</p>
+                        <p className="text-xs sm:text-sm whitespace-pre-wrap">{item.text}</p>
                         <p className="text-xs opacity-70 mt-1">
                           {item.timestamp.toLocaleTimeString()}
                         </p>
@@ -627,8 +677,8 @@ function App() {
         </motion.div>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
+          <div className="mt-4 p-3 sm:p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-2 text-sm sm:text-base">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             {error}
           </div>
         )}
