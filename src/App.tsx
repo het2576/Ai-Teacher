@@ -51,8 +51,8 @@ const translations = {
   },
   voice: {
     title: 'Voice Input',
-    start: 'Start Listening',
-    stop: 'Stop Listening',
+    start: 'Start Speaking',
+    stop: 'Stop Speaking',
     ask: 'Ask Question',
     placeholder: 'Speak to ask a question...'
   },
