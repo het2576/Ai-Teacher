@@ -1,4 +1,4 @@
-# 🚀 AI Teacher  (https://ai-teacherx.netlify.app/)
+# 🚀 AI Teacher  (https://ai-teacherr.netlify.app/)
 
 ## 📌 Overview  
 **AI Teacher** is an AI-powered learning assistant that helps users ask questions, analyze images, and get instant educational support through **voice and visual interaction**. Designed to make learning **interactive, engaging, and accessible**, AI Teacher allows users to:  
@@ -26,7 +26,7 @@
 ## 🛠 Tech Stack  
 - **Frontend:** React, TypeScript, Tailwind CSS  
 - **Backend & Database:** Supabase  
-- **AI & APIs:** OpenAI API, Tesseract.js, Web Speech API  
+- **AI & APIs:** GEMINI API, Tesseract.js, Web Speech API  
 - **UI Enhancements:** Framer Motion, shadcn/ui  
 
 ## 🚧 Challenges We Overcame  
@@ -35,7 +35,7 @@
 - **UI/UX Improvements** – Implemented Framer Motion animations and Tailwind styling.  
 
 ## 🔗 Live Demo & Resources  
-- 🌐 **Live Project:** [https://ai-teacherx.netlify.app/]  
+- 🌐 **Live Project:** [https://ai-teacherr.netlify.app/]  
 
 ## 🏆 Hackathon Submission  
 This project was submitted to **DUHacks 4.0** as an innovative AI-driven educational assistant. 
